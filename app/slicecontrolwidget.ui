@@ -153,85 +153,85 @@
         </item>
        </layout>
       </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <widget class="QComboBox" name="orientationComboBox">
+        <property name="minimumSize">
+         <size>
+          <width>81</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>131</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <item>
-         <widget class="QComboBox" name="orientationComboBox">
-          <property name="minimumSize">
-           <size>
-            <width>81</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>131</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <item>
-           <property name="text">
-            <string>Radical Left</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Left</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Centre Left</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Centre</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Centre Right</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Right</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Radical Right</string>
-           </property>
-          </item>
-         </widget>
+         <property name="text">
+          <string>Radical Left</string>
+         </property>
         </item>
         <item>
-         <widget class="QSpinBox" name="membersSpinBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>81</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>131</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="maximum">
-           <number>1000</number>
-          </property>
-         </widget>
+         <property name="text">
+          <string>Left</string>
+         </property>
         </item>
-       </layout>
+        <item>
+         <property name="text">
+          <string>Centre Left</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Centre</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Centre Right</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Right</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Radical Right</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="membersSpinBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>109</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>131</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -340,6 +340,9 @@
           </property>
           <property name="showGroupSeparator" stdset="0">
            <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <double>100.000000000000000</double>
           </property>
          </widget>
         </item>

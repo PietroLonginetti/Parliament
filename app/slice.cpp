@@ -41,6 +41,10 @@ void Slice::setColorFromOrientation(Orientation o){
         break;
     case RADICAL_RIGHT:
         this->setColor(QColor("black"));
+        break;
+    case NONE:
+        this->setBrush(Qt::BDiagPattern);
+        this->setColor("green");
     }
 }
 
@@ -73,14 +77,19 @@ void Slice::updateOrientation(int index){
 }
 
 void Slice::updateMembers(int members){
-    party->setMembers(members);
-    this->setValue(members);
+    int initialMembers = this->value();
+    this->party->setMembers(members);
+    this->percentageChanged();
+    if(!this->getParty()->getIsMixedGroup())
+        this->membersChanged(initialMembers - this->value());
 }
 
 void Slice::updateConsensus(int points){
     party->setConsensus(points);
 }
 
-void Slice::removeYourself(){
-    emit sliceRemoving(this);
+void Slice::removeYourself(bool isSelected){
+    if(isSelected)
+        emit sliceRemovingWhileSelected(this);
+    else emit sliceRemovingWhileNotSelected(this);
 }

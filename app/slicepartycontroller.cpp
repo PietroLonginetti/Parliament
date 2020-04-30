@@ -4,6 +4,18 @@
 
 
 // --- CONSTRUCTORS --- //
+SlicePartyController::SlicePartyController(){
+    this->scw = new SliceControlWidget();
+    this->vw = new VoteWidget();
+    selectedSlice = nullptr;
+    votingYes = 0;
+    votingNo = 0;
+
+    connect(scw->getUi()->removePartyButton, &QPushButton::clicked, this, &SlicePartyController::removePartySelected);
+}
+
+
+// --- FUNCTIONS --- //
 Party* SlicePartyController::createParty(QString name, Orientation o, int members){
     Party * party = new Party(name, o, members);
     party->setSlice(new Slice(party));
@@ -13,14 +25,13 @@ Party* SlicePartyController::createParty(QString name, Orientation o, int member
     connect(party->getSlice(), &Slice::sliceHovered, this, &SlicePartyController::showBorder); 
     connect(party->getSlice(), &Slice::sliceHovered, this, &SlicePartyController::explodeSlice);
     connect(party->getSlice(), &Slice::sliceClicked, this, &SlicePartyController::handleSliceClicked);
-    connect(party->getSlice(), &Slice::sliceRemoving, this, &SlicePartyController::removeParty);
-    connect(this->scw->getUi()->membersSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &SlicePartyController::updatePercentages);
 
+    emit partyCreated(party);
     parties.push_back(party);
     return party;
 }
 
-Party* SlicePartyController::createPartyByCopy(Party* other){
+Party* SlicePartyController::copyParty(Party* other){
     Party* party = new Party(other->getName(),other->getOrientation(),other->getMembers(),other->getOwner(),other->getConsensus());
     party->setSlice(new Slice(party));
     party->getSlice()->setColor(other->getSlice()->color());
@@ -30,44 +41,72 @@ Party* SlicePartyController::createPartyByCopy(Party* other){
     connect(party->getSlice(), &Slice::sliceHovered, this, &SlicePartyController::showBorder);
     connect(party->getSlice(), &Slice::sliceHovered, this, &SlicePartyController::explodeSlice);
     connect(party->getSlice(), &Slice::sliceClicked, this, &SlicePartyController::handleSliceClicked);
-    connect(party->getSlice(), &Slice::sliceRemoving, this, &SlicePartyController::removeParty);
-    connect(this->scw->getUi()->membersSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &SlicePartyController::updatePercentages);
 
     handleSliceClicked(party->getSlice());
     parties.push_back(party);
     return party;
 }
 
+Party* SlicePartyController::createMixedGroup(int members){
+    Party* mixedGroup = new Party(true);
+    mixedGroup->setMembers(members);
+    mixedGroup->setSlice(new Slice(mixedGroup));
+    mixedGroup->getSlice()->setColorFromOrientation(NONE);
+    mixedGroup->getSlice()->setLabelVisible(true);
 
-// --- FUNCTIONS --- //
+    connect(mixedGroup->getSlice(), &Slice::hovered, this, &SlicePartyController::changeCursor);
+    connect(mixedGroup->getSlice(), &Slice::sliceClicked, this, &SlicePartyController::handleSliceClicked);
+
+    emit partyCreated(mixedGroup);
+    parties.push_back(mixedGroup);
+    return mixedGroup;
+}
+
 void SlicePartyController::refreshSliceControlWidget(Slice* slice){
     if(selectedSlice != nullptr){
         disconnectControlWidget(selectedSlice);
     }
     this->selectedSlice = slice;
+    scw->getUi()->membersSpinBox->setMaximum(100);
 
-    scw->getUi()->partyNameLineEdit->setText(this->selectedSlice->getParty()->getName());
-    scw->getUi()->orientationComboBox->setCurrentIndex(this->selectedSlice->getParty()->getOrientation());
-    scw->getUi()->membersSpinBox->setValue(this->selectedSlice->getParty()->getMembers());
-    scw->getUi()->ownerLineEdit->setText(this->selectedSlice->getParty()->getOwner());
-    scw->getUi()->percentageDoubleSpinBox->setValue(this->selectedSlice->percentage()*100);
-    scw->getUi()->consensusSpinBox->setValue(this->selectedSlice->getParty()->getConsensus());
+    scw->getUi()->partyNameLineEdit->setText(selectedSlice->getParty()->getName());
+    scw->getUi()->orientationComboBox->setCurrentIndex(selectedSlice->getParty()->getOrientation());
+    scw->getUi()->membersSpinBox->setValue(selectedSlice->getParty()->getMembers());
+    scw->getUi()->ownerLineEdit->setText(selectedSlice->getParty()->getOwner());
+    scw->getUi()->percentageDoubleSpinBox->setValue(selectedSlice->percentage()*100);
+    scw->getUi()->consensusSpinBox->setValue(selectedSlice->getParty()->getConsensus());
 
-    connectControlWidget(selectedSlice);
+    //Setting del limite  di incremento di deputati:
+    vector<Party *>::iterator it = parties.begin();
+    int max = 0;
+    if(findMixedGroup(it)){
+        max = selectedSlice->value() + (*it)->getMembers();
+        scw->getUi()->membersSpinBox->setMaximum(max);
+    }
+    else {
+        max = selectedSlice->value();
+        scw->getUi()->membersSpinBox->setMaximum(max);
+    }
+    if(!selectedSlice->getParty()->getIsMixedGroup())
+        scw->getUi()->membersSpinBox->setSuffix("  ( max: " + QString::number(max) + " )");
+    else scw->getUi()->membersSpinBox->setSuffix("");
 
+    //Enabling control Widget..
     if(!scw->allItemsAreEnabled()){
        scw->enableWidgets(true);
     }
+    if(!selectedSlice->getParty()->getIsMixedGroup())
+        connectControlWidget(selectedSlice);
+    else scw->enableWidgets(false);
 }
 
 void SlicePartyController::disconnectControlWidget(Slice *slice){
     if(selectedSlice != nullptr){
-    disconnect(scw->getUi()->partyNameLineEdit, &QLineEdit::textChanged, slice, &Slice::updateName);
-    disconnect(scw->getUi()->ownerLineEdit, &QLineEdit::textChanged, slice, &Slice::updateOwner);
-    disconnect(scw->getUi()->orientationComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), slice, &Slice::updateOrientation);
-    disconnect(scw->getUi()->membersSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), slice, &Slice::updateMembers);
-    disconnect(scw->getUi()->removePartyButton, &QPushButton::clicked, slice, &Slice::removeYourself);
-    disconnect(scw->getUi()->consensusSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), slice, &Slice::updateConsensus);
+        disconnect(scw->getUi()->partyNameLineEdit, &QLineEdit::textChanged, slice, &Slice::updateName);
+        disconnect(scw->getUi()->ownerLineEdit, &QLineEdit::textChanged, slice, &Slice::updateOwner);
+        disconnect(scw->getUi()->orientationComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), slice, &Slice::updateOrientation);
+        disconnect(scw->getUi()->membersSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), slice, &Slice::updateMembers);
+        disconnect(scw->getUi()->consensusSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), slice, &Slice::updateConsensus);
     }
 }
 
@@ -76,28 +115,60 @@ void SlicePartyController::connectControlWidget(Slice *slice){
     connect(scw->getUi()->ownerLineEdit, &QLineEdit::textChanged, slice, &Slice::updateOwner);
     connect(scw->getUi()->orientationComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), slice, &Slice::updateOrientation);
     connect(scw->getUi()->membersSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), slice, &Slice::updateMembers);
-    connect(scw->getUi()->membersSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &SlicePartyController::updatePercentages);
-    connect(scw->getUi()->removePartyButton, &QPushButton::clicked, slice, &Slice::removeYourself);
     connect(scw->getUi()->consensusSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), slice, &Slice::updateConsensus);
 }
 
+bool SlicePartyController::findMixedGroup(vector<Party *>::iterator &it){
+    // La funzione ritorna un valore booleano che indica se il gruppo misto si trova nell'intervallo di partiti
+    // che partono dal valore dell'iteratore "it" passato fino alla fine del vettore. Alla fine della ricerca it "punterà"
+    // al gruppo misto se esso era presente nel suddetto intervallo, altrimenti a vector.end
+
+    bool found = false;
+    while(it!=parties.end() && found == false){
+        if((*it)->getIsMixedGroup()){
+            found = true;
+            break;
+        }
+        ++it;
+    }
+    return found;
+}
+
+//funzioni per la votazione
 bool SlicePartyController::votePassed(){
     return (votingYes > votingNo);
 }
-
 void SlicePartyController::resetVotingParameters(){
     votingYes = 0;
     votingNo = 0;
 }
 
+//funzioni di controllo del vettore//
+vector<Party *>::iterator SlicePartyController::getPartiesBegin(){
+    return parties.begin();
+}
+void SlicePartyController::pushBackParty(Party* p){
+    parties.push_back(p);
+}
+unsigned int SlicePartyController::getPartiesSize(){
+    return parties.size();
+}
+Party* SlicePartyController::getPartyAt(int i){
+    return parties.at(i);
+}
+void SlicePartyController::erasePartyAt(int i){
+    std::vector<Party *>::iterator it = parties.begin() + i;
+    parties.erase(it);
+}
+
 // ---- SLOTS ---- //
 void SlicePartyController::showBorder(bool show, Slice* slice){
     if(show){
-        slice->setBorderWidth(3);
+        slice->setBorderWidth(2);
         slice->setBorderColor(QColor("silver"));
     } else {
         slice->setBorderColor(QColor("white"));
-        slice->setBorderWidth(2);
+        slice->setBorderWidth(1);
     }
 }
 
@@ -118,8 +189,12 @@ void SlicePartyController::explodeSlice(bool hover, Slice* slice){
     }
 }
 
-void SlicePartyController::removeParty(Slice* slice){
-    parties.erase(find(parties.begin(),parties.end(),slice->getParty()));
+void SlicePartyController::removePartySelected(){
+    if(selectedSlice != nullptr){
+        updateMixedGroupMembers(selectedSlice->value());
+        parties.erase(find(parties.begin(), parties.end(), selectedSlice->getParty()));
+        selectedSlice->removeYourself(true);
+    }
 }
 
 void SlicePartyController::updatePercentages(){
@@ -127,22 +202,46 @@ void SlicePartyController::updatePercentages(){
         scw->getUi()->percentageDoubleSpinBox->setValue(selectedSlice->percentage()*100);
 }
 
+void SlicePartyController::updateMixedGroupMembers(int membersToAdd){
+    vector<Party *>::iterator it = parties.begin();
+    if(!findMixedGroup(it)){
+        createMixedGroup(membersToAdd);
+    } else {
+        if((*it)->getMembers() + membersToAdd <= 0){
+            if(selectedSlice->getParty()->getIsMixedGroup())
+                selectedSlice = nullptr;
+            (*it)->getSlice()->removeYourself(false);
+            parties.erase(it);
+        } else {
+            (*it)->getSlice()->updateMembers((*it)->getMembers() + membersToAdd);
+        }
+    }
+}
+
 void SlicePartyController::handleSliceClicked(Slice* slice){
-    if(slice != selectedSlice){
+    if(slice != selectedSlice){         
         disconnect(slice, &Slice::sliceHovered, this, &SlicePartyController::explodeSlice);
         disconnect(slice, &Slice::sliceHovered, this, &SlicePartyController::showBorder);
-        slice->setExploded(true);
-        slice->setExplodeDistanceFactor(0.1);
-        slice->setBorderColor("silver");
-        slice->setBorderWidth(4);
+        if(!slice->getParty()->getIsMixedGroup()){
+           slice->setExploded(true);
+           slice->setExplodeDistanceFactor(0.1);
+           slice->setBorderColor("gainsboro");
+           slice->setBorderWidth(3);
+        }
         releaseLockedSlice(selectedSlice);
         refreshSliceControlWidget(slice);
         selectedSlice = slice;
+        connect(selectedSlice, &Slice::percentageChanged, this, &SlicePartyController::updatePercentages);
+        connect(selectedSlice, &Slice::membersChanged, this, &SlicePartyController::updateMixedGroupMembers);
     }
 }
 
 void SlicePartyController::releaseLockedSlice(Slice* slice){
     if(slice != nullptr){
+        disconnect(slice, &Slice::percentageChanged, this, &SlicePartyController::updatePercentages);
+        disconnect(slice, &Slice::membersChanged, this, &SlicePartyController::updateMixedGroupMembers);
+    }
+    if(slice != nullptr && !slice->getParty()->getIsMixedGroup()){
         connect(slice, &Slice::sliceHovered, this, &SlicePartyController::explodeSlice);
         connect(slice, &Slice::sliceHovered, this, &SlicePartyController::showBorder);
         slice->setExploded(false);

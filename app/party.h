@@ -2,15 +2,16 @@
 #define PARTY_H
 
 #include <QString>
+#include <QObject>
 
 using namespace std;
 class Slice;
-enum Orientation {RADICAL_LEFT, LEFT, CENTRE_LEFT, CENTRE, CENTRE_RIGHT, RIGHT, RADICAL_RIGHT};
+enum Orientation {RADICAL_LEFT, LEFT, CENTRE_LEFT, CENTRE, CENTRE_RIGHT, RIGHT, RADICAL_RIGHT, NONE};
 
-class Party {
+class Party{
 
 private:
-    Slice* slice;
+    Slice* slice = nullptr;
 
     QString name;
     Orientation orientation;
@@ -18,9 +19,13 @@ private:
     QString owner;
     int consensus;
 
+    bool isMixedGroup;
+
 
 public:
-    Party(QString name, Orientation o, int members, QString owner = "Unknown", int consensus = 0);
+    Party();
+    Party(QString name, Orientation o, int members, QString owner = "Unknown", int consensus = 0, bool isMixedGroup = false);
+    Party(bool isMixedGroup);
 
     Slice* getSlice() const;
     void setSlice(Slice* slice);
@@ -34,6 +39,8 @@ public:
     void setMembers(int members);
     void setConsensus(int consensus);
     void setOrientation(Orientation orientation);
+    void setIsMixedGroup(const bool itIs);
+    bool getIsMixedGroup() const;
 
     ~Party();
 };

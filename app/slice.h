@@ -25,7 +25,9 @@ signals:
     void sliceHovered(bool isHovered, Slice* slice);
     void sliceClicked(Slice* slice);
     void orientationChanged(Slice* slice);
-    void sliceRemoving(Slice * slice);
+    void sliceRemovingWhileSelected(Slice * slice);
+    void sliceRemovingWhileNotSelected(Slice * slice);
+    void membersChanged(int members);
 
 
 public slots:
@@ -36,7 +38,7 @@ public slots:
     void updateOrientation(int index);
     void updateMembers(int members);
     void updateConsensus(int points);
-    void removeYourself();
+    void removeYourself(bool isSelected);
 };
 
 #endif // SLICE_H

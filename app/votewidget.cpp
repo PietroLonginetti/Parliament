@@ -7,7 +7,6 @@ VoteWidget::VoteWidget(QWidget *parent) : QWidget(parent), ui(new Ui::VoteWidget
 
     ui->yesButton->setChecked(true);
 
-
     this->setLayout(ui->totalWidget);
 }
 

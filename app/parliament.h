@@ -13,6 +13,9 @@ class Parliament : public QWidget {
     Q_OBJECT
 
 private:
+    unsigned int parliamentMembers;
+    unsigned int numOfPlayers;
+
     QVBoxLayout* layout;
     QPushButton* addPartyButton;
     QPushButton* voteButton;
@@ -28,13 +31,14 @@ private:
 
 
 public:
-    Parliament(int numOfPlayers = 7);
+    Parliament(unsigned int parliamentMembers = 100, unsigned int numOfPlayers = 1);
 
     QChartView* getChartView() const{return chartview;}
     SliceControlWidget* getSliceControlWidget() const {return scw;}
 
     void transportSlice(Slice* sliceToMove, int pos);
-    void connectSliceStuffing(Slice* slice);
+    void connectStuffing(Slice* slice);
+    int placeSliceFromOrientation(Slice* slice);
 
 
 signals:
@@ -42,11 +46,14 @@ signals:
 
 
 public Q_SLOTS:
-    int placeSliceFromOrientation(Slice* s);
-    void insertSlice();
-    void removeSlice(Slice* slice);
-    void votingProcess();
-    void endVotingProcess();
+    void addPartyButtonClicked();
+    int replaceSliceFromOrientation(Slice* s);
+    void insertSlice(Party * party);
+    void removeSliceWhileSelected(Slice* slice);
+    void removeSliceWhileNotSelected(Slice* slice);
+    void startVotingProcess();
+    void showResultEndExitVotingProcess();
+    void exitVotingProcess();
 };
 
 #endif // PARLIAMENT_H
