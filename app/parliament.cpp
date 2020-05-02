@@ -2,29 +2,29 @@
 
 
 // --- CONSTRUCTORS --- //
-Parliament::Parliament(unsigned int parliamentMembers, unsigned int numOfPlayers){
+Parliament::Parliament(unsigned int parliamentMembers, unsigned int players){
     // initialization
     this->parliamentMembers = parliamentMembers;
-    this->numOfPlayers = numOfPlayers;
+    this->players = players;
 
     spc = new SlicePartyController();
 
     addPartyButton = new QPushButton("Add Party");
-    addPartyButton->setMaximumSize(150,100);
-    addPartyButton->setMinimumSize(100,40);
+    addPartyButton->setMaximumSize(120,90);
+    addPartyButton->setMinimumSize(80,30);
     voteButton = new QPushButton("Vote");
-    voteButton->setMaximumSize(150,100);
-    voteButton->setMinimumSize(100,40);
+    voteButton->setMaximumSize(120,90);
+    voteButton->setMinimumSize(80,30);
 
     chartControlWidget = new QHBoxLayout;
-    chartControlWidget->addSpacerItem(new QSpacerItem(20,20));
+    chartControlWidget->addSpacerItem(new QSpacerItem(200,20));
     chartControlWidget->addWidget(addPartyButton);
     chartControlWidget->addWidget(voteButton);
-    chartControlWidget->addSpacerItem(new QSpacerItem(20,20));
+    chartControlWidget->addSpacerItem(new QSpacerItem(200,20));
 
     scw = spc->getControlWidget();
     vw = spc->getVoteWidget();
-    slices = new QPieSeries(nullptr);
+    slices = new QPieSeries();
     chart = new QChart();
     dvr = new DialogVoteResults();
     layout = new QVBoxLayout();
@@ -41,11 +41,12 @@ Parliament::Parliament(unsigned int parliamentMembers, unsigned int numOfPlayers
     chart->setAnimationOptions(QChart::AllAnimations);
     chart->setAnimationDuration(1500);
     chart->legend()->hide();
+    chart->setTitle("PARLIAMENT MEMBERS :  " + QString::number(parliamentMembers));
+    f.setBold(true);
+    chart->setTitleFont(f);
 
     // create series
-    auto mg = spc->createMixedGroup(parliamentMembers);
-    connectStuffing(mg->getSlice());
-    slices->append(mg->getSlice());
+    buildParliament(players);
 
     slices->setPieStartAngle(-90);
     slices->setPieEndAngle(90);
@@ -72,6 +73,61 @@ Parliament::Parliament(unsigned int parliamentMembers, unsigned int numOfPlayers
 
 
 // --- FUNCTIONS --- //
+void Parliament::buildParliament(int numOfPlayers){
+    if(numOfPlayers == 0){
+        spc->createMixedGroup(parliamentMembers);
+    }
+    if(numOfPlayers == 1){
+        spc->createMixedGroup(parliamentMembers);
+        spc->createParty("Centre Party", CENTRE, parliamentMembers/2);
+    }
+    if(numOfPlayers == 2){
+        spc->createMixedGroup(parliamentMembers);
+        spc->createParty("Left Party", LEFT, parliamentMembers/3);
+        spc->createParty("Right Party", RIGHT, parliamentMembers/3);
+    }
+    if(numOfPlayers == 3){
+        spc->createMixedGroup(parliamentMembers);
+        spc->createParty("Left Party", LEFT, parliamentMembers/4);
+        spc->createParty("Centre Party", CENTRE, parliamentMembers/4);
+        spc->createParty("Right Party", RIGHT, parliamentMembers/4);
+    }
+    if(numOfPlayers == 4){
+        spc->createMixedGroup(parliamentMembers);
+        spc->createParty("Radical-Left Party", RADICAL_LEFT, parliamentMembers/5);
+        spc->createParty("Centre-Left Party", CENTRE_LEFT, parliamentMembers/5);
+        spc->createParty("Centre-Right Party", CENTRE_RIGHT, parliamentMembers/5);
+        spc->createParty("Radical-Right Party", RADICAL_RIGHT, parliamentMembers/5);
+    }
+    if(numOfPlayers == 5){
+        spc->createMixedGroup(parliamentMembers);
+        spc->createParty("Radical-Left Party", RADICAL_LEFT, parliamentMembers/6);
+        spc->createParty("Centre-Left Party", CENTRE_LEFT, parliamentMembers/6);
+        spc->createParty("Centre Party", CENTRE, parliamentMembers/6);
+        spc->createParty("Centre-Right Party", CENTRE_RIGHT, parliamentMembers/6);
+        spc->createParty("Radical-Right Party", RADICAL_RIGHT, parliamentMembers/6);
+    }
+    if(numOfPlayers == 6){
+        spc->createMixedGroup(parliamentMembers);
+        spc->createParty("Radical-Left Party", RADICAL_LEFT, parliamentMembers/7);
+        spc->createParty("Centre-Left Party", CENTRE_LEFT, parliamentMembers/7);
+        spc->createParty("Left Party", LEFT, parliamentMembers/7);
+        spc->createParty("Right Party", RIGHT, parliamentMembers/7);
+        spc->createParty("Centre-Right Party", CENTRE_RIGHT, parliamentMembers/7);
+        spc->createParty("Radical-Right Party", RADICAL_RIGHT, parliamentMembers/7);
+    }
+    if(numOfPlayers == 7){
+        spc->createMixedGroup(parliamentMembers);
+        spc->createParty("Radical-Left Party", RADICAL_LEFT, parliamentMembers/8);
+        spc->createParty("Centre-Left Party", CENTRE_LEFT, parliamentMembers/8);
+        spc->createParty("Left Party", LEFT, parliamentMembers/8);
+        spc->createParty("Centre Party", CENTRE, parliamentMembers/8);
+        spc->createParty("Right Party", RIGHT, parliamentMembers/8);
+        spc->createParty("Cntre-Right Party", CENTRE_RIGHT, parliamentMembers/8);
+        spc->createParty("Radical-Right Party", RADICAL_RIGHT, parliamentMembers/8);
+    }
+}
+
 void Parliament::connectStuffing(Slice* slice){
     if(!slice->getParty()->getIsMixedGroup()){
         connect(slice, &Slice::orientationChanged, this , &Parliament::replaceSliceFromOrientation);
@@ -89,7 +145,6 @@ void Parliament::transportSlice(Slice* sliceToMove, int pos){
         }
     }
     sliceToMove->removeYourself(true);
-    numOfPlayers++;
     spc->setSelectedSlice(tmp->getSlice());
     slices->insert(pos, tmp->getSlice());
     connectStuffing(tmp->getSlice());
@@ -104,7 +159,7 @@ int Parliament::placeSliceFromOrientation(Slice* s){
     if(s->getParty()->getOrientation() == LEFT){
         int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT)
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == NONE)
                 count++;
         }
         slices->insert(count, s);
@@ -113,55 +168,59 @@ int Parliament::placeSliceFromOrientation(Slice* s){
     if(s->getParty()->getOrientation() == CENTRE_LEFT){
         int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT)
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT || spc->getPartyAt(i)->getOrientation() == NONE)
                 count++;
         }
         slices->insert(count, s);
         return count;
     }
     if(s->getParty()->getOrientation() == CENTRE){
-        int countleft = 0;
+        int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
             if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT
-                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT)
-                countleft++;
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT || spc->getPartyAt(i)->getOrientation() == NONE)
+                count++;
         }
-        int countright = 0;
-        for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_RIGHT || spc->getPartyAt(i)->getOrientation() == RIGHT
-                    || spc->getPartyAt(i)->getOrientation() == CENTRE_RIGHT)
-                countright++;
-        }
-        if(countleft <= countright){
-            slices->insert(countleft, s);
-            return (countleft);
-        } else {
-            slices->insert((slices->count() - countright - 1), s);
-            return (slices->count() - countright - 1);
-        }
+        slices->insert(count, s);
+        return (count);
     }
     if(s->getParty()->getOrientation() == CENTRE_RIGHT){
         int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_RIGHT || spc->getPartyAt(i)->getOrientation() == RIGHT)
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT || spc->getPartyAt(i)->getOrientation() == CENTRE
+                    || spc->getPartyAt(i)->getOrientation() == NONE)
                 count++;
         }
-        slices->insert((slices->count() - count -1), s);
-        return slices->count() - count -1;
+        slices->insert(count, s);
+        return count;
     }
     if(s->getParty()->getOrientation() == RIGHT){
         int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_RIGHT)
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT || spc->getPartyAt(i)->getOrientation() == CENTRE
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_RIGHT || spc->getPartyAt(i)->getOrientation() == NONE)
                 count++;
         }
-        slices->insert((slices->count() - count -1), s);
-        return slices->count() - count;
+        slices->insert(count, s);
+        return count;
     }
-
     if(s->getParty()->getOrientation() == RADICAL_RIGHT){
-        slices->insert(slices->count()-1, s);
-        return slices->count();
+        int count = 0;
+        for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT || spc->getPartyAt(i)->getOrientation() == CENTRE
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_RIGHT || spc->getPartyAt(i)->getOrientation() == RIGHT
+                    || spc->getPartyAt(i)->getOrientation() == NONE)
+                count++;
+        }
+        slices->insert(count, s);
+        return count;
+    }
+    if(s->getParty()->getOrientation() == NONE){
+        slices->insert(slices->count()/2, s);
+        return slices->count()/2;
     }
     return -1;
 }
@@ -193,55 +252,55 @@ int Parliament::replaceSliceFromOrientation(Slice* s){
         return count;
     }
     if(s->getParty()->getOrientation() == CENTRE){
-        int countleft = 0;
+        int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
             if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT
-                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT)
-                countleft++;
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT || spc->getPartyAt(i)->getOrientation() == NONE)
+                count++;
         }
-        int countright = 0;
-        for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_RIGHT || spc->getPartyAt(i)->getOrientation() == RIGHT
-                    || spc->getPartyAt(i)->getOrientation() == CENTRE_RIGHT)
-                countright++;
-        }
-        if(countleft <= countright){
-            transportSlice(s, countleft);
-            return (countleft);
-        } else {
-            transportSlice(s, (slices->count() - countright - 1));
-            return (slices->count() - countright - 1);
-        }
+        transportSlice(s, count);
+        return (count);
     }
     if(s->getParty()->getOrientation() == CENTRE_RIGHT){
         int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_RIGHT || spc->getPartyAt(i)->getOrientation() == RIGHT)
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT || spc->getPartyAt(i)->getOrientation() == CENTRE
+                    || spc->getPartyAt(i)->getOrientation() == NONE)
                 count++;
         }
-        transportSlice(s, (slices->count() - count -1));
-        return slices->count() - count -1;
+        transportSlice(s, count);
+        return count;
     }
     if(s->getParty()->getOrientation() == RIGHT){
         int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_RIGHT)
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT || spc->getPartyAt(i)->getOrientation() == CENTRE
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_RIGHT || spc->getPartyAt(i)->getOrientation() == NONE)
                 count++;
         }
-        transportSlice(s, (slices->count() - count -1));
-        return slices->count() - count;
+        transportSlice(s, count);
+        return count;
     }
 
     if(s->getParty()->getOrientation() == RADICAL_RIGHT){
-        transportSlice(s, slices->count()-1);
-        return slices->count();
+        int count = 0;
+        for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT || spc->getPartyAt(i)->getOrientation() == CENTRE
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_RIGHT || spc->getPartyAt(i)->getOrientation() == RIGHT
+                    || spc->getPartyAt(i)->getOrientation() == NONE)
+                count++;
+        }
+        transportSlice(s, count);
+        return count;
     }
     return -1;
 }
 
-
 void Parliament::addPartyButtonClicked(){
-    spc->createParty("Unknown", CENTRE, 0);
+    spc->createParty("New Party", CENTRE, 10);
 }
 
 void Parliament::insertSlice(Party * party){
@@ -249,42 +308,36 @@ void Parliament::insertSlice(Party * party){
 
     if(party->getIsMixedGroup()){
         if(!spc->findMixedGroup(it)){
-            slices->insert(numOfPlayers/2, party->getSlice());
+            slices->insert(slices->count()/2, party->getSlice());
             connectStuffing(party->getSlice());
         }
     }
     else { //party is not Mixed Group
-        numOfPlayers++;
         if(!spc->findMixedGroup(it)){   // mixed group non è presente
             // TODO: mostrare un messaggio che dice che non è possibile aggiungere un nuovo partito perchè non ci sono sufficienti membri disponibili
         } else {    // mixed group è presente
-            if((*it)->getMembers() <= 10){
+            if((*it)->getMembers() <= party->getMembers()){
                 party->setMembers((*it)->getMembers());
-                spc->updateMixedGroupMembers(-10);
+                spc->updateMixedGroupMembers(- party->getMembers());
                 placeSliceFromOrientation(party->getSlice());
                 connectStuffing(party->getSlice());
             } else {
-                party->setMembers(10);
-                spc->updateMixedGroupMembers(-10);
+                spc->updateMixedGroupMembers(- party->getMembers());
                 placeSliceFromOrientation(party->getSlice());
                 connectStuffing(party->getSlice());
             }
         }
     }
-    //emit totalMembersModified();
 }
 
 void Parliament::removeSliceWhileSelected(Slice* slice){
-    numOfPlayers--;
     slices->remove(slice);
     spc->setSelectedSlice(nullptr);
     scw->enableWidgets(false);
 }
 
 void Parliament::removeSliceWhileNotSelected(Slice* slice){
-    numOfPlayers--;
     slices->remove(slice);
-    //emit totalMembersModified();
 }
 
 void Parliament::startVotingProcess(){

@@ -11,11 +11,6 @@ Slice::Slice(Party* party){
 
     this->setBorderWidth(2);
     this->setBorderColor(QColor("white"));
-
-    QFont f;
-    f.setBold(true);
-    f.setPointSizeF(10);
-    this->setLabelFont(f);
 }
 
 // --- FUNCTIONS --- //
@@ -44,7 +39,7 @@ void Slice::setColorFromOrientation(Orientation o){
         break;
     case NONE:
         this->setBrush(Qt::BDiagPattern);
-        this->setColor("green");
+        this->setColor("black");
     }
 }
 

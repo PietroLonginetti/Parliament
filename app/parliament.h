@@ -14,7 +14,8 @@ class Parliament : public QWidget {
 
 private:
     unsigned int parliamentMembers;
-    unsigned int numOfPlayers;
+    unsigned int players;
+    //unsigned int currentPlayers = 0;
 
     QVBoxLayout* layout;
     QPushButton* addPartyButton;
@@ -29,10 +30,12 @@ private:
 
     SlicePartyController* spc;
 
+    QFont f;
 
 public:
-    Parliament(unsigned int parliamentMembers = 100, unsigned int numOfPlayers = 1);
+    Parliament(unsigned int parliamentMembers = 100, unsigned int players = 0);
 
+    void buildParliament(int players);
     QChartView* getChartView() const{return chartview;}
     SliceControlWidget* getSliceControlWidget() const {return scw;}
 

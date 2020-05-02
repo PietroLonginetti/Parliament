@@ -1,6 +1,7 @@
 #include "slicepartycontroller.h"
 #include "slicecontrolwidget.h"
 #include <QApplication>
+#include <time.h>
 
 
 // --- CONSTRUCTORS --- //
@@ -20,6 +21,7 @@ Party* SlicePartyController::createParty(QString name, Orientation o, int member
     Party * party = new Party(name, o, members);
     party->setSlice(new Slice(party));
     party->getSlice()->setColorFromOrientation(party->getOrientation());
+    party->getSlice()->setLabelVisible(true);
 
     connect(party->getSlice(), &Slice::hovered, this, &SlicePartyController::changeCursor);
     connect(party->getSlice(), &Slice::sliceHovered, this, &SlicePartyController::showBorder); 
@@ -67,7 +69,7 @@ void SlicePartyController::refreshSliceControlWidget(Slice* slice){
         disconnectControlWidget(selectedSlice);
     }
     this->selectedSlice = slice;
-    scw->getUi()->membersSpinBox->setMaximum(100);
+    scw->getUi()->membersSpinBox->setMaximum(1000);
 
     scw->getUi()->partyNameLineEdit->setText(selectedSlice->getParty()->getName());
     scw->getUi()->orientationComboBox->setCurrentIndex(selectedSlice->getParty()->getOrientation());
@@ -136,6 +138,15 @@ bool SlicePartyController::findMixedGroup(vector<Party *>::iterator &it){
 
 //funzioni per la votazione
 bool SlicePartyController::votePassed(){
+    if(vw->getUi()->mixedGroupCheckBox->isChecked()){
+        vector<Party *>::iterator it = parties.begin();
+        if(findMixedGroup(it)){
+            srand(time(NULL));
+            if(rand() %2 == 0)
+                votingYes += (*it)->getMembers();
+            else votingNo += (*it)->getMembers();
+        }
+    }
     return (votingYes > votingNo);
 }
 void SlicePartyController::resetVotingParameters(){
@@ -208,7 +219,7 @@ void SlicePartyController::updateMixedGroupMembers(int membersToAdd){
         createMixedGroup(membersToAdd);
     } else {
         if((*it)->getMembers() + membersToAdd <= 0){
-            if(selectedSlice->getParty()->getIsMixedGroup())
+            if(selectedSlice != nullptr && selectedSlice->getParty()->getIsMixedGroup())
                 selectedSlice = nullptr;
             (*it)->getSlice()->removeYourself(false);
             parties.erase(it);

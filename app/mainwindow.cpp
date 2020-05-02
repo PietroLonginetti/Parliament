@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -7,8 +7,22 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    p = new Parliament();
-    this->setCentralWidget(p);
+    this->setCentralWidget(ui->wizardWidget);
+    connect(ui->newGameButton, &QPushButton::clicked, this, &MainWindow::startGame);
+}
+
+void MainWindow::startGame(){
+    if(ui->membersSpinBox->value() > 0){
+        p = new Parliament(ui->membersSpinBox->value(), ui->playersSpinBox->value());
+
+        this->setCentralWidget(p);
+        this->resize(900,600);
+
+        QRect screenGeometry = QApplication::desktop()->screenGeometry();
+        int x = (screenGeometry.width() - this->width()) / 2;
+        int y = (screenGeometry.height() - this->height()) / 2;
+        this->move(x, y);
+    }
 }
 
 MainWindow::~MainWindow()

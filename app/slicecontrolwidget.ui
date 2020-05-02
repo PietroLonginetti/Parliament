@@ -173,7 +173,7 @@
         </property>
         <item>
          <property name="text">
-          <string>Radical Left</string>
+          <string>Radical-Left</string>
          </property>
         </item>
         <item>
@@ -183,7 +183,7 @@
         </item>
         <item>
          <property name="text">
-          <string>Centre Left</string>
+          <string>Centre-Left</string>
          </property>
         </item>
         <item>
@@ -193,7 +193,7 @@
         </item>
         <item>
          <property name="text">
-          <string>Centre Right</string>
+          <string>Centre-Right</string>
          </property>
         </item>
         <item>
@@ -203,7 +203,7 @@
         </item>
         <item>
          <property name="text">
-          <string>Radical Right</string>
+          <string>Radical-Right</string>
          </property>
         </item>
        </widget>
