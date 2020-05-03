@@ -41,6 +41,9 @@
                <height>0</height>
               </size>
              </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
              <property name="text">
               <string>Click &quot;Yes&quot;, &quot;No&quot; or &quot;Absteined&quot; and then select the parties.</string>
              </property>

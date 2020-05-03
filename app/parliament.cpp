@@ -39,11 +39,11 @@ Parliament::Parliament(unsigned int parliamentMembers, unsigned int players){
 
     // create chart
     chart->setAnimationOptions(QChart::AllAnimations);
-    chart->setAnimationDuration(1500);
-    chart->legend()->hide();
-    chart->setTitle("PARLIAMENT MEMBERS :  " + QString::number(parliamentMembers));
+    chart->setAnimationDuration(2000);
+    chart->setTitle(QString::number(parliamentMembers) + " MEMBERS");
     f.setBold(true);
     chart->setTitleFont(f);
+    chart->legend()->hide();
 
     // create series
     buildParliament(players);
@@ -52,7 +52,7 @@ Parliament::Parliament(unsigned int parliamentMembers, unsigned int players){
     slices->setPieEndAngle(90);
     slices->setHoleSize(0.2);
     slices->setPieSize(1);
-    slices->setVerticalPosition(0.73);
+    slices->setVerticalPosition(0.75);
     chart->addSeries(slices);
 
     // create chart view
