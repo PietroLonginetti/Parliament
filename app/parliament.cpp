@@ -159,7 +159,7 @@ int Parliament::placeSliceFromOrientation(Slice* s){
     if(s->getParty()->getOrientation() == LEFT){
         int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == NONE)
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT)
                 count++;
         }
         slices->insert(count, s);
@@ -168,7 +168,7 @@ int Parliament::placeSliceFromOrientation(Slice* s){
     if(s->getParty()->getOrientation() == CENTRE_LEFT){
         int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
-            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT || spc->getPartyAt(i)->getOrientation() == NONE)
+            if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT)
                 count++;
         }
         slices->insert(count, s);
@@ -178,7 +178,7 @@ int Parliament::placeSliceFromOrientation(Slice* s){
         int count = 0;
         for(unsigned int i = 0; i < spc->getPartiesSize(); i++){
             if(spc->getPartyAt(i)->getOrientation() == RADICAL_LEFT || spc->getPartyAt(i)->getOrientation() == LEFT
-                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT || spc->getPartyAt(i)->getOrientation() == NONE)
+                    || spc->getPartyAt(i)->getOrientation() == CENTRE_LEFT)
                 count++;
         }
         slices->insert(count, s);

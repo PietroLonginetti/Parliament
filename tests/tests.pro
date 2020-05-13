@@ -1,5 +1,4 @@
-QT += testlib charts
-QT -= gui
+QT += gui testlib charts
 
 CONFIG += qt console warn_on depend_includepath testcase
 CONFIG -= app_bundle
@@ -24,7 +23,7 @@ SOURCES +=  tst_testparliament.cpp \
             ../app/slice.cpp \
             ../app/slicecontrolwidget.cpp \
             ../app/slicepartycontroller.cpp \
-            ../app/votewidget.cpp
+            ../app/votewidget.cpp \
 
 FORMS +=    ../app/dialogvoteresults.ui \
             ../app/mainwindow.ui \

@@ -14,8 +14,9 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    Ui::MainWindow * getUi(){return ui;}
+    MainWindow(QWidget *parent = nullptr);  
+    Ui::MainWindow * getUi() const {return ui;}
+    Parliament * getParliament() const {return p;}
     ~MainWindow();
 
 private:
