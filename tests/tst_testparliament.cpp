@@ -28,7 +28,8 @@ private slots:
     void testParliamentConstruction_6Players();
     void testParliamentConstruction_7Players();
 
-    void testPartyMembersAssignment();
+    void testLegalAssignment();
+    void testIllegalAssignment();
 
     void testAllVotingYes();
     void testAllVotingNo();
@@ -135,7 +136,7 @@ void testParliament::testParliamentConstruction_7Players(){
     QCOMPARE(w->getParliament()->getSlices()->slices().at(7)->value(), 12);
 }
 
-void testParliament::testPartyMembersAssignment(){
+void testParliament::testLegalAssignment(){
     w = new MainWindow;
     w->getUi()->membersSpinBox->setValue(100);
     w->getUi()->playersSpinBox->setValue(7);
@@ -148,6 +149,32 @@ void testParliament::testPartyMembersAssignment(){
 
             unsigned int initialMembers = selectedSlice->value();
             w->getParliament()->getSPC()->getControlWidget()->getUi()->membersSpinBox->stepBy(16);
+            QCOMPARE(selectedSlice->value(), initialMembers + 16);
+
+            w->getParliament()->getSPC()->getControlWidget()->getUi()->membersSpinBox->stepBy(-16);
+            QCOMPARE(selectedSlice->value(), initialMembers);
+        }
+    }
+}
+void testParliament::testIllegalAssignment(){
+    w = new MainWindow;
+    w->getUi()->membersSpinBox->setValue(100);
+    w->getUi()->playersSpinBox->setValue(7);
+    w->startGame();
+
+    for(int i = 0; i< w->getParliament()->getSlices()->count(); i++){
+        if(!static_cast<Slice*>(w->getParliament()->getSlices()->slices().at(i))->getParty()->getIsMixedGroup()){
+            QPieSlice* selectedSlice = w->getParliament()->getSlices()->slices().at(i);
+            selectedSlice->clicked();
+
+            unsigned int initialMembers = selectedSlice->value();
+            w->getParliament()->getSPC()->getControlWidget()->getUi()->membersSpinBox->stepBy(100);  //illegal assigment: spinbox members threshold is "initial members"+ 16
+            QCOMPARE(selectedSlice->value(), initialMembers + 16);
+
+            w->getParliament()->getSPC()->getControlWidget()->getUi()->membersSpinBox->stepBy(-16);
+            QCOMPARE(selectedSlice->value(), initialMembers);
+
+            w->getParliament()->getSPC()->getControlWidget()->getUi()->membersSpinBox->stepBy(17);  //illegal assigment: spinbox members threshold is "initial members"+ 16
             QCOMPARE(selectedSlice->value(), initialMembers + 16);
 
             w->getParliament()->getSPC()->getControlWidget()->getUi()->membersSpinBox->stepBy(-16);
